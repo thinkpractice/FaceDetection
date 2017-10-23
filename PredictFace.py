@@ -52,7 +52,7 @@ def main(argv):
         img = image.load_img(imageFilename, target_size=(224, 224))
         x = image.img_to_array(img)
         x = np.expand_dims(x, axis=0)
-        x = preprocess_input(x)
+        x /= 255 #preprocess_input(x)
 
         score = model.predict(x)
         print("{} = {} thus: {}".format(imageFilename, score[0], "man" if score[0] > 0.5 else "woman"))
