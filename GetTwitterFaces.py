@@ -24,7 +24,6 @@ class Twitter(object):
             auth.set_access_token(access_token, access_token_secret)
             
             self.__api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, timeout=10)
-            print("blabalbla")
         return self.__api
 
     def getKeysFromFile(self, filename):
@@ -72,12 +71,11 @@ class RetrieveUserDetails(object):
 
     def start(self, userId):
         friends = self.twitter.friendsDo(userId)
-        #followers = self.twitter.followersDo(userId)
-        #print(followers)
+        followers = self.twitter.followersDo(userId)
 
         newUserIds = set(friends)
+        newUserIds = newUserIds.union(set(followers))
         print(newUserIds)
-        #newUserIds = newUserIds.union(set(followers))
         
         notInUserIds = newUserIds - self.userIds
         self.userIds = self.userIds.union(newUserIds)
@@ -85,16 +83,21 @@ class RetrieveUserDetails(object):
         newProfileInfos = []
         #breadth first enumeration of userIds
         for userId in notInUserIds:
-            yield self.processProfile(userId)
+            profileInfo = self.processProfile(userId)
+            if not profileInfo:
+                continue
+            yield profileInfo
 
         for userId in notInUserIds:
             yield from self.start(userId)
 
     def processProfile(self, userId):
-        user = self.twitter.api.get_user(id = userId)
-        print ("retrieving data for: {}".format(user.screen_name))
-        return [userId, user.screen_name, user.description, user.url, user.time_zone, user.location, user.followers_count, user.friends_count, user.statuses_count, user.profile_image_url]
-       
+        try:
+            user = self.twitter.api.get_user(id = userId)
+            print ("retrieving data for: {}".format(user.screen_name))
+            return [userId, user.screen_name, user.description, user.url, user.time_zone, user.location, user.followers_count, user.friends_count, user.statuses_count, user.profile_image_url]
+        except Exception:
+            return []
 
 def getExtension(url):
     if ".png" in pictureUrl.lower():
