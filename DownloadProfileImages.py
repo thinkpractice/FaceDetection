@@ -1,9 +1,11 @@
 import csv
 import sys
 import os
+import urllib.request
 
 def getProfileImageUrl(screenName):
-    return "https://twitter.com/{}/profile_image?size=original".format(screenName)
+    #return "https://twitter.com/{}/profile_image?size=original".format(screenName)
+    return screenName.replace("normal", "400x400")
 
 def getImageFilename(destinationDirectory, profileId, extension):
     return os.path.join(destinationDirectory, "{}.{}".format(profileId, extension))
@@ -18,11 +20,12 @@ def main(argv):
     filename = argv[1]
     destinationDirectory = argv[2]
     with open(filename, "r") as csvFile:
-        csvReader = csv.DictReade(csvFile, delimiter=";")
+        csvReader = csv.DictReader(csvFile, delimiter=";")
         for row in csvReader:
-            imageUrl = getProfileImageUrl(row["screen_name"])
-            destinationPath = getImageFilename(destinationDirectory, row["id"], "jpg")
-            downloadImage(imageUrl, destinationDirectory)
+            imageUrl = getProfileImageUrl(row["profile_image_url"])
+            extension = "png" if ".png" in imageUrl else "jpg"
+            destinationPath = getImageFilename(destinationDirectory, row["id"], extension)
+            downloadImage(imageUrl, destinationPath)
 
 if __name__ == "__main__":
     main(sys.argv)
