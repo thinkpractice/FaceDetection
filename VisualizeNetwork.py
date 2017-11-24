@@ -129,7 +129,7 @@ def main(argv):
     model.summary()
     print('Model loaded.')
     
-    visualizeModel(model, "max_pooling2d_5")
+    visualizeModel(model, "conv2d_8")
 
 if __name__ == "__main__":
     main(sys.argv)

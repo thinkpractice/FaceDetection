@@ -11,7 +11,10 @@ def getImageFilename(destinationDirectory, profileId, extension):
     return os.path.join(destinationDirectory, "{}.{}".format(profileId, extension))
 
 def downloadImage(url, destinationPath):
-    urllib.request.urlretrieve(url, destinationPath)
+    try:
+        urllib.request.urlretrieve(url, destinationPath)
+    except Exception:
+        print("Could not download {}".format(url))
 
 def main(argv):
     if len(argv) <= 2:
