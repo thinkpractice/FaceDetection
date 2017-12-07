@@ -103,10 +103,12 @@ def train_top_model():
     model.compile(optimizer='rmsprop',
                   loss='binary_crossentropy', metrics=['accuracy'])
 
+    modelCheckpoint = ModelCheckpoint("faces_{epoch:02d}_{val_acc:.2f}.hdf5", monitor="val_acc", verbose=1, save_best_only=True)
     model.fit(train_data, train_labels,
               epochs=epochs,
               batch_size=batch_size,
-              validation_data=(validation_data, validation_labels))
+              validation_data=(validation_data, validation_labels),
+              callbacks=[modelCheckpoint])
     model.save_weights(top_model_weights_path)
 
 
