@@ -50,7 +50,7 @@ validation_data_dir = '../MoreData/Test'
 nb_train_samples = 9000
 nb_validation_samples = 1000
 epochs = 50
-batch_size = 16
+batch_size = 20
 
 
 def save_bottlebeck_features():
@@ -101,7 +101,7 @@ def train_top_model():
     model.add(Dense(1, activation='sigmoid'))
 
     model.compile(optimizer='rmsprop',
-                  loss='categorical_crossentropy', metrics=['accuracy'])
+                  loss='binary_crossentropy', metrics=['accuracy'])
 
     model.fit(train_data, train_labels,
               epochs=epochs,
