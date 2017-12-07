@@ -47,8 +47,8 @@ img_width, img_height = 150, 150
 top_model_weights_path = 'bottleneck_fc_model.h5'
 train_data_dir = '../MoreData/Train'
 validation_data_dir = '../MoreData/Test'
-nb_train_samples = 9134
-nb_validation_samples = 1017
+nb_train_samples = 9000
+nb_validation_samples = 1000
 epochs = 50
 batch_size = 16
 
@@ -87,18 +87,18 @@ def train_top_model():
     #train_data = np.load(open('bottleneck_features_train.npy'))
     train_data = np.load('bottleneck_features_train.npy')
     train_labels = np.array(
-        [1,0,0] * (nb_train_samples // 3) + [0,1,0] * (nb_train_samples // 3) + [0,0,1] * (nb_train_samples // 3))
+        [1] * (nb_train_samples // 2) + [0] * (nb_train_samples // 2))
 
     #validation_data = np.load(open('bottleneck_features_validation.npy'))
     validation_data = np.load('bottleneck_features_validation.npy')
     validation_labels = np.array(
-        [1,0,0] * (nb_validation_samples // 3) + [0,1,0] * (nb_validation_samples // 3) + [0,0,1] * (nb_validation_samples // 3))
+        [1] * (nb_validation_samples // 2) + [0] * (nb_validation_samples // 2))
     print(len(validation_labels))
     model = Sequential()
     model.add(Flatten(input_shape=train_data.shape[1:]))
     model.add(Dense(256, activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(3, activation='softmax'))
+    model.add(Dense(1, activation='sigmoid'))
 
     model.compile(optimizer='rmsprop',
                   loss='categorical_crossentropy', metrics=['accuracy'])
