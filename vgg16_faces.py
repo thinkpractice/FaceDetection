@@ -97,7 +97,7 @@ def main(argv):
 
     epochs = 60
     #batchSize = 32
-    batchSize = 16
+    batchSize = 30
     print("Loading data...")
     train_generator, validation_generator = loadData(trainDirectory, testDirectory, batchSize, "binary")
     numberOfTrainingImages = countImages(trainDirectory)
@@ -108,7 +108,7 @@ def main(argv):
     #model = ZFNet('vgg16_weights.h5')
     print("Compiling model...")
     model = getModel()
-    sgd = SGD(lr=1e-4, decay=1e-6, momentum=0.9)#, nesterov=True)
+    sgd = SGD(lr=1e-3, decay=1e-6, momentum=0.9)#, nesterov=True)
     model.compile(optimizer=sgd, loss='binary_crossentropy', metrics=["accuracy"])
 
     print("Training model...")
