@@ -1,17 +1,17 @@
-import numpy as np
-import glob
-import os
 from keras.preprocessing import image
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dropout, Flatten, Dense, Conv2D, GlobalMaxPooling2D
 from keras import applications
 from sklearn.cluster import KMeans
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from random import shuffle
 import matplotlib.pyplot as plt
 import os
-
+import random
+import numpy as np
+import glob
+import math
 #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 #os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
@@ -19,7 +19,10 @@ import os
 img_width, img_height = 400, 400
 numberOfClusters = 4
 top_model_weights_path = 'bottleneck_fc_model.h5'
+
 epochs = 50
+
+labeledPoint = namedtuple('features', 'label', 'distance')
 
 def getImagesInDirectory(directory, recursive=False):
     return image.list_pictures(directory)
@@ -47,6 +50,58 @@ def calculateBottlebeckFeatures(imagePaths, nb_train_samples, batch_size):
         generator, nb_train_samples // batch_size)
 
     return bottleneck_features.reshape(bottleneck_features.shape[0], bottleneck_features.shape[1] * bottleneck_features.shape[2] * bottleneck_features.shape[3])
+
+def initializeClusterCenters(images, numberOfClusters):
+    return random.choices(images, k=numberOfClusters)
+
+def calculateFeatures(model, centerImages):
+    #extract feature representation from fully connected layer
+    predictions = model.predict(centerImages)
+    fullyConnectedLayer = model.get_layer(name="fc9") 
+    return fullyConnectedLayer.output
+
+def distance(imageFeatures, center):
+    diff = imageFeatures - centerFeatures
+    return math.sqrt(np.dot(diff, diff))
+
+def calculateDistance(imageFeatures, centerFeatures):
+    allDistances = [(centerIndex, distance(imageFeatures, center.features)) for centerIndex, center in enumerate(centerFeatures)]
+    centerIndex, minDistance = min(allDistances, key=lambda x: x[1])
+    return labeledPoint(imageFeatures, centerFeatures[centerIndex].label, minDistance)
+
+def fineTuneModel(model, selectedPoints, Km):
+    pass
+
+def updateCentroids(centerFeatures, learningRates):
+    pass
+
+def cluster(model, images, numberOfClusters, epochs, miniBatchSize, Km):
+    C = initializeClusterCenters(images, numberOfClusters)
+    centerFeatures = calculateFeatures(model, C)
+    Mn = []
+    Yn = []
+    for epoch in range(epochs):
+        M = random.sample(images, miniBatchSize)
+
+        #assign each point to its closest center
+        distances = []
+        pointsPerLabel = defaultdict(int)
+        for m in M:
+            d = calculateDistance(m, centerFeatures)
+            distances.append(d)
+            pointsPerLabel[d.label] += 1
+        learningRates = {key: 1 / pointsPerLabel[key] for key in pointsPerLabel.keys()}
+        closestFeatures = sorted(distances, key = lambda x: x.distance)[0:Km] 
+
+        Mn.append(closestFeatures)
+        if len(Mn) == miniBatchSize:
+            fineTuneModel(model, Mn, Km)
+            for m in M:
+                updateCentroids(centerFeatures, learningRates)
+            Mn = []
+            Yn = []
+
+
 
 def main():
     train_data_dir = '../Faces/MoreData/Train'
