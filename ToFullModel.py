@@ -1,5 +1,5 @@
 from keras.applications import VGG16
-from keras.models import load_model
+from keras.models import load_model, Model
 import sys
 
 def main(argv):
@@ -8,12 +8,15 @@ def main(argv):
         exit(1)
 
     partialModelFilename = argv[1]
-    fullModelFilename = arvg[2]
+    fullModelFilename = argv[2]
 
     partialModel = load_model(partialModelFilename)
 
-    featuresModel = applications.VGG16(include_top=False, weights='imagenet')
+    featuresModel = VGG16(include_top=False, weights='imagenet')
 
     fullModel = Model(input=featuresModel.input, output=partialModel.output)
     fullModel.summary()
     fullModel.save(fullModelFilename)
+
+if __name__ == "__main__":
+    main(sys.argv)
