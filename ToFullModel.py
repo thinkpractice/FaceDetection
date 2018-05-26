@@ -14,7 +14,7 @@ def main(argv):
 
     featuresModel = VGG16(include_top=False, weights='imagenet')
 
-    fullModel = Model(input=featuresModel.input, output=partialModel.output)
+    fullModel = Model(input=featuresModel.input, outputs=partialModel.output)
     fullModel.summary()
     fullModel.save(fullModelFilename)
 
